@@ -9,7 +9,14 @@ description = "Utils to streamline pytorch operations"
 readme = "Readme.md"
 requires-python = ">=3.8"
 authors = [{name = "Tomasz Tarczyński"}]
+dependencies = [
+    "torch>=2.0.0",
+    "pyyaml>=6.0"
+]
 license = {text = "MIT"}
 
 [tool.setuptools.packages.find]
 where = ["."]
+
+[tool.setuptools.package-data]
+torch_utils = ["data/*.yaml"]
