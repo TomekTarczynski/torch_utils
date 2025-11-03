@@ -70,7 +70,7 @@ def get_device_information(sm_cores: dict) -> dict:
     logging.info(f"Device information:\n{device_information}")    
     return device_information
 
-def load_config(): -> dict:
+def load_config() -> dict:
     """
     Loads a dictionary containing information about number of cores in Streamline Multiprocessors.
 
