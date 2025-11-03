@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "torch_utils"
+version = "0.1.0"
+description = "Utils to streamline pytorch operations"
+readme = "Readme.md"
+requires-python = ">=3.8"
+authors = [{name = "Tomasz Tarczyński"}]
+licence = {text = "MIT"}
+
+[tool.setuptools.package.find]
+where = ["."]
