@@ -9,7 +9,7 @@ description = "Utils to streamline pytorch operations"
 readme = "Readme.md"
 requires-python = ">=3.8"
 authors = [{name = "Tomasz Tarczyński"}]
-licence = {text = "MIT"}
+license = {text = "MIT"}
 
 [tool.setuptools.package.find]
 where = ["."]
