@@ -1,7 +1,10 @@
-import subprocess
 import torch
-import logging
 import yaml
+
+import subprocess
+import logging
+from importlib import resources
+
 
 TERA = 1e12
 
@@ -78,7 +81,7 @@ def load_config() -> dict:
         dict: Number of cores in SM.
     """
 
-    with open("data/sm_cores.yaml", "r") as file:
+    with resources.files("torch_utils").joinpath("data/sm_cores.yaml").open("r") as file:
         sm_cores = yaml.safe_load(file)
         logging.info("sm_cores.yaml loaded successfully")
         return sm_cores
