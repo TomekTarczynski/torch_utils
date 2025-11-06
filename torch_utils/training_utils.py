@@ -76,7 +76,7 @@ def find_max_train_batch(
         int: Max batch_size for training loop
     """
     min_batch = 1
-    max_batch = len(train_dataset)
+    max_batch = len(dataset)
 
     model.to(device)
     while max_batch - min_batch > 1:
