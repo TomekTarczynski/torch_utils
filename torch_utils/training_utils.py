@@ -2,6 +2,8 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
+from cuda_utils import cuda_free_memory
+
 def check_training_memory(
     model: nn.Module, 
     dataset: torch.utils.data.Dataset, 
@@ -50,3 +52,49 @@ def check_training_memory(
     finally:
         torch.cuda.empty_cache()
     return True
+
+def find_max_train_batch(
+    model: nn.Module, 
+    dataset: torch.utils.data.Dataset, 
+    optimizer: optim.Optimizer, 
+    criterion: nn.modules.loss._Loss, 
+    device: torch.device,
+    verbose: bool = True) -> int:
+    """
+    The function returns maximum batch_size which fits into the memory and allow to train the model.
+    Args:
+        model: Model to train
+        dataset: Dataset from which batches will be drawn
+        optimizer: optimizer used during training
+        criterion: loss function used during training
+        device: device used to store model
+        verbose: If yes then print current batch_size that was evaluated.
+
+    Returns:
+        int: Max batch_size for training loop
+    """
+    min_batch = 1
+    max_batch = len(train_dataset)
+
+    model.to(device)
+    while max_batch - min_batch > 1:
+        current_batch = (max_batch + min_batch) // 2
+    
+        current_batch_result = check_training_memory(
+            model = model,
+            dataset = dataset,
+            optimizer = optimizer,
+            criterion = criterion,
+            batch_size = current_batch,
+            device = device,
+            max_iter = 5)
+    
+        print(f"Current batch = {current_batch} Result: {current_batch_result}")
+    
+        if current_batch_result:
+            min_batch = current_batch
+        else:
+            max_batch = current_batch
+    
+        cuda_free_memory()
+    return min_batch    
