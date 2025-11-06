@@ -147,3 +147,57 @@ def calculate_throughput(
             if time.time() - start_time > max_time_s:
                 throughput = total_obs / (time.time() - start_time)
                 return throughput    
+
+
+def gradient_noise_scale(
+    model: nn.Module, 
+    dataset: torch.utils.data.dataset.Dataset, 
+    criterion: torch.nn.modules.module.Module, 
+    n: int, 
+    k: int) -> float:
+    """
+    Function calculates gradient noise scale, which is defined as S = E[Var(teta)] / E[Mean(teta)^2].
+    High values indicates that the noise in gradients introduced by random batches is relatively high in comparison to the mean value of the gradient.
+    From the noise perspective there is no point in having higher batch size than the one for which S ~= 1.
+
+    Args:
+        model: Model for which gradient noise scale is calculate
+        dataset: Dataset used for calculation (use training)
+        criterion: The loss function
+        n: Number of experiment
+        k: Batch size used to estimate S. It is recommented to use at least 128. For lower values it is hard to estimate the variance of the gradient.
+
+    Returns:
+        float: The gradient noise scale
+    """
+    
+    model.eval()
+    loader=DataLoader(
+        dataset=dataset,
+        batch_size=k,
+        shuffle=True,
+        num_workers=0,
+        pin_memory=False,
+        persistent_workers=False,
+        drop_last=True)
+    
+    grads = []
+    data_iter = iter(loader)
+    for i in range(n):
+        try:
+            data, label = next(data_iter)
+        except StopIteration:
+            data_iter = iter(loader)
+            data, label = next(data_iter) 
+        model.zero_grad()
+        data, label = data.to(device), label.to(device)
+        output = model(data)
+        loss = criterion(output, label)
+        loss.backward()
+        grad_vector = torch.cat([p.grad.detach().flatten() for p in model.parameters()])
+        grads.append(grad_vector)
+    G = torch.stack(grads)
+    grad_var = torch.var(G, dim=0)
+    grad_mean = torch.mean(G, dim=0)
+    S = grad_var.mean() / grad_mean.pow(2).mean()
+    return S.item()                
