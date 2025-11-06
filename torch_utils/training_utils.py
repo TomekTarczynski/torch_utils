@@ -153,6 +153,7 @@ def gradient_noise_scale(
     model: nn.Module, 
     dataset: torch.utils.data.dataset.Dataset, 
     criterion: torch.nn.modules.module.Module, 
+    device: torch.device, 
     n: int, 
     k: int) -> float:
     """
@@ -164,13 +165,15 @@ def gradient_noise_scale(
         model: Model for which gradient noise scale is calculate
         dataset: Dataset used for calculation (use training)
         criterion: The loss function
+        device: Device on which model is stored
         n: Number of experiment
         k: Batch size used to estimate S. It is recommented to use at least 128. For lower values it is hard to estimate the variance of the gradient.
 
     Returns:
         float: The gradient noise scale
     """
-    
+
+    model.to(device)
     model.eval()
     loader=DataLoader(
         dataset=dataset,
