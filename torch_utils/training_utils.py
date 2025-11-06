@@ -1,8 +1,10 @@
+import time
+import sys, os
+
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-import sys, os
 sys.path.append(os.path.dirname(__file__))
 from cuda_utils import cuda_free_memory
 
@@ -99,4 +101,49 @@ def find_max_train_batch(
             max_batch = current_batch
     
         cuda_free_memory()
-    return min_batch    
+    return min_batch   
+
+def calculate_throughput(
+    model: nn.Module, 
+    dataset: torch.utils.data.Dataset, 
+    optimizer: optim.Optimizer, 
+    criterion: nn.modules.loss._Loss, 
+    batch_size: int, 
+    device: torch.device, 
+    max_time_s: float) -> float:
+    """
+    The function calculates throughput during training for a given batch_size.
+    Args:
+        model: Model to train.
+        dataset: Dataset from which batches will be drawn.
+        optimizer: optimizer used during training.
+        criterion: loss function used during training.
+        batch_size: the size of the batch.
+        device: device used to store model.
+        max_time_s: maximum time in seconds.
+
+    Returns:
+        float: Throughput during training
+    """
+    
+    model.train()
+    optimizer.zero_grad()
+    loader = DataLoader(
+        dataset = dataset,
+        batch_size = batch_size,
+        drop_last = True)
+
+    total_obs = 0
+    start_time = time.time()
+    while True:
+        for i, (input, target) in enumerate(data_loader):
+            input, target = input.to(device), target.to(device)
+            logits = model(input)
+            loss = criterion(logits, target)
+            loss.backward()
+            optimizer.step()
+            optimizer.zero_grad()
+            total_obs += len(input)
+            if time.time() - start_time > max_time_s:
+                throughput = total_obs / (time.time() - start_time)
+                return throughput    
