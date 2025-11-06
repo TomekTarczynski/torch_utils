@@ -2,6 +2,8 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
+import sys, os
+sys.path.append(os.path.dirname(__file__))
 from cuda_utils import cuda_free_memory
 
 def check_training_memory(
