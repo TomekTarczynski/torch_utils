@@ -136,7 +136,7 @@ def calculate_throughput(
     total_obs = 0
     start_time = time.time()
     while True:
-        for i, (input, target) in enumerate(data_loader):
+        for i, (input, target) in enumerate(loader):
             input, target = input.to(device), target.to(device)
             logits = model(input)
             loss = criterion(logits, target)
